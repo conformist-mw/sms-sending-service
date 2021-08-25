@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang=ru>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>Рассылка SMS предупреждений</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+  <style type="text/css">
+    body {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Content here -->
+    <h1 class="mt-3 mb-5">SMS рассылки</h1>
+
+    <div class="card mb-5">
+      <div class="card-body">
+        <h5 class="card-title">Новая рассылка</h5>
+        <form method="post" action="/send/" class="mt-4 mb-4 js-send-message-form">
+          <fieldset>
+            <div class="form-row align-items-center">
+              <div class="col">
+                <input type="text" class="form-control mb-2" name="text" required="required" placeholder="Текст сообщения">
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary mb-2">Отправить
+                </button>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mb-5">
+      <div class="card-body" id="mailingProgress">
+        <p class="lead" v-if="!mailings.length">Пока нет рассылок</p>
+
+          <!-- Start SMSMailing card -->
+          <div class="row mt-4 mb-4" v-for="mailing in mailings">
+            <div class="col-3">
+              <p class="lead text-right mr-1">
+                {{mailing.date}}
+              </p>
+            </div>
+            <div class="col-9">
+              <div class="progress mt-1" style="height: 20px;">
+
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" :aria-valuenow="mailing.percentFulfilled" aria-valuemin="0" aria-valuemax="100" v-bind:style="{width:mailing.percentFulfilled+'%'}">{{mailing.percentFulfilled + '%'}}</div>
+
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" :aria-valuenow="mailing.percentFailed" aria-valuemin="0" aria-valuemax="100" v-bind:style="{width:mailing.percentFailed+'%'}">{{mailing.percentFailed + '%'}}</div>
+
+              </div>
+              <p class="text-muted mt-2">
+                Рассылка #{{mailing.mailingId}}. {{mailing.SMSText}}
+              </p>
+            </div>
+          </div>
+          <!-- End SMSMailing card -->
+
+      </div>
+    </div>
+
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/loglevel/1.6.4/loglevel.min.js" integrity="sha256-ACTlnmNCkOooSKkPCKYbiex8WLE82aeiN+Z9ElZag5Q=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.13.1/validate.min.js" integrity="sha256-xgP6yiUGsRLSmsC8oW0KrRWiK2ek7cSBznIDMEcdp/U=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <!-- development version, includes helpful console warnings -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script type="text/javascript">
+    function makeAsyncForm(form){
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+
+        let formData = new FormData(form);
+
+        const bodyParams = new URLSearchParams();
+        for (const pair of formData) {
+            bodyParams.append(pair[0], pair[1]);
+        }
+
+        form.firstElementChild.disabled = true;
+        fetch(form.action, {
+          method: 'POST',
+          body: bodyParams,
+        }).then(response => {
+          
+          response.json().then(data => {
+            form.reset();
+            form.firstElementChild.disabled = false;
+            
+            if (data.errorMessage){
+              alert(data.errorMessage);
+            }
+          });
+        })
+        .catch(error => {
+          form.reset();
+          form.firstElementChild.disabled = false;
+          console.error(error)
+        });;
+      })
+    }
+    let forms = document.getElementsByClassName('js-send-message-form');
+    for (let form of forms){
+      makeAsyncForm(form);
+    }
+  </script>
+  <script type="text/javascript">
+    const serverUpdateMsgScheme = {
+      msgType: {presence: true, type: 'string', format: /SMSMailingStatus/},
+      SMSMailings: {presence: true, type: 'array'},
+    };
+    const SMSMailingScheme = {
+      timestamp: {presence: true, type: 'number'},
+      SMSText: {presence: true, type: 'string'},
+      mailingId: {presence: true, type: 'string'},
+      totalSMSAmount: {presence: true, type: 'integer'},
+      deliveredSMSAmount: {presence: true, type: 'integer'},
+      failedSMSAmount: {presence: true, type: 'integer'},
+    };
+    function validateSMSMailingScheme(jsonData){
+      const errors = validate(jsonData, serverUpdateMsgScheme);
+
+      if (errors){
+        log.error('Server message format is broken. Check out errors:', errors);
+        log.info('Following message data was received:', jsonData);
+        return false;
+      }
+
+      for (let mailingMessage of jsonData.SMSMailings){
+        const errors = validate(mailingMessage, SMSMailingScheme);
+        if (mailingMessage.deliveredSMSAmount > mailingMessage.totalSMSAmount ||
+          mailingMessage.totalSMSAmount <= 0 ||
+          mailingMessage.deliveredSMSAmount < 0){
+          log.error("totalSMSAmount and deliveredSMSAmount shouldn't be less or equal than 0 and totalSMSAmount should be greater than deliveredSMSAmount");
+          return false;
+        }
+        if (mailingMessage.failedSMSAmount > mailingMessage.totalSMSAmount ||
+          mailingMessage.totalSMSAmount <= 0 ||
+          mailingMessage.failedSMSAmount < 0){
+          log.error("totalSMSAmount and failedSMSAmount shouldn't be less or equal than 0 and totalSMSAmount should be greater than failedSMSAmount");
+          return false;
+        }
+        if (errors){
+          log.error('Server message format is broken. Check out errors:', errors);
+          log.info('Following info was received:', mailingMessage);
+          return false;
+        }
+      }
+
+      return true;
+    }
+  </script>
+  <script type="text/javascript">
+    class WebsocketClosed extends Error {
+        constructor() {
+          super('WebsocketClosed');
+        }
+    };
+
+    async function waitTillSocketOpen(webSocket){
+      return new Promise((resolve, reject) => {
+        const onSocketClose = ()=>{
+          reject(new WebsocketClosed());
+          webSocket.removeEventListener('open', onWebsocketOpen);
+        }
+
+        const onWebsocketOpen = event => {
+          resolve();
+          webSocket.removeEventListener('close', onSocketClose);
+        }
+        webSocket.addEventListener('close', onSocketClose);
+        webSocket.addEventListener('open', onWebsocketOpen);
+      });
+    }
+
+    async function waitForIncomeMsg(webSocket){
+      return new Promise((resolve, reject) => {
+        const onSocketClose = ()=>{
+          reject(new WebsocketClosed());
+          webSocket.removeEventListener('message', onMsgReceive);
+        }
+
+        const onMsgReceive = event => {
+          resolve(event.data);
+          webSocket.removeEventListener('close', onSocketClose);
+        }
+        webSocket.addEventListener('close', onSocketClose);
+        webSocket.addEventListener('message', onMsgReceive);
+      });
+    }
+  </script>
+  <script type="text/javascript">
+    const websocketAddress = localStorage.getItem('websocket') || 'ws://127.0.0.1:5000/ws';
+    log.info(`Websocket address is ${websocketAddress}`);
+
+    async function sleep(delay){
+      return new Promise((resolve, reject) => {
+        setTimeout(resolve, delay);
+      });
+    }
+
+    function formatDate(date){
+      // https://stackoverflow.com/a/3067896/8052573
+      let monthRaw = (date.getMonth() + 1).toString(); // getMonth() is zero-based
+      let monthFormatted = (monthRaw.length == 1)?"0"+monthRaw:monthRaw;
+
+      let dayRaw = date.getDate().toString();
+      let dayFormatted = (dayRaw.length == 1)?"0"+dayRaw:dayRaw;
+
+      let yearFormatted = date.getFullYear().toString();
+
+      let minutesRaw = date.getMinutes().toString();
+      let minutesFormatted = (minutesRaw.length == 1)?"0"+minutesRaw:minutesRaw;
+
+      let hoursRaw = date.getHours().toString();
+      let hoursFormatted = (hoursRaw.length == 1)?"0"+hoursRaw:hoursRaw;
+
+      let timeFormatted = hoursFormatted + ":" + minutesFormatted
+      let dateFormatted = dayFormatted + "." + monthFormatted + "." + yearFormatted
+
+      return timeFormatted + " " + dateFormatted
+    }
+
+    async function updateProgressbar(rawMailings){
+      let idToMailing = {};
+      for (let mailing of app.mailings){
+        idToMailing[mailing.mailingId] = mailing;
+      }
+
+      for (let rawMailing of rawMailings){
+        let percentFulfilled = rawMailing.deliveredSMSAmount / rawMailing.totalSMSAmount * 100;
+        let percentFailed = rawMailing.failedSMSAmount / rawMailing.totalSMSAmount * 100;
+        let date = new Date();
+        date.setTime(rawMailing.timestamp.toFixed(2) * 1000)
+        let mailing = {
+            mailingId: rawMailing.mailingId,
+            percentFulfilled: percentFulfilled.toFixed(2),
+            percentFailed: percentFailed.toFixed(2),
+            percentEmpty: (100 - percentFulfilled).toFixed(2),
+            SMSText: rawMailing.SMSText,
+            date: formatDate(date),
+            timestamp: rawMailing.timestamp,
+        };
+
+        if (idToMailing.hasOwnProperty(mailing.mailingId)){
+          for (var key in mailing) {
+            Vue.set(idToMailing[mailing.mailingId], key, mailing[key]);
+          }
+        } else {
+          idToMailing[mailing.mailingId] = mailing;
+          app.mailings.push(mailing);
+        }
+        app.mailings.sort((a, b) => {
+          if (a.timestamp > b.timestamp) {
+            return -1;
+          }
+          if (a.timestamp < b.timestamp) {
+            return 1;
+          }
+          // a должно быть равным b
+          return 0;
+        });
+      }
+    }
+
+    async function trackSMSMailing(socket){
+      while (true){
+        const msgJSON = await waitForIncomeMsg(socket);
+
+        try {
+          var msgData = JSON.parse(msgJSON);
+        } catch (error) {
+          log.error(`Expect JSON from server, but receive:`, msgJSON);
+          continue;
+        }
+
+        if (msgData.msgType == 'SMSMailingStatus'){
+          if (!validateSMSMailingScheme(msgData)){
+            return;
+          }
+          log.debug('Receive mailing update from server', msgData);
+          updateProgressbar(msgData.SMSMailings);
+        } else {
+          log.error('Unknown server message received', msgData);
+        }
+      }
+    }
+
+    async function listenSocket(){
+      const socket = new WebSocket(websocketAddress);
+
+      await waitTillSocketOpen(socket);
+
+      log.info('Websocket connection established');
+
+      await trackSMSMailing(socket);
+    }
+
+    async function listenSocketWithReconnects(){
+      while (true){
+        try {
+          await listenSocket();
+
+        } catch (error){
+          if (error instanceof WebsocketClosed){
+            log.info('Connection lost. Try to reconnect in 1 sec.')
+            await sleep(1000);
+            continue;
+          }
+
+          throw error;
+        }
+      }
+    }
+    var app = new Vue({
+      el: '#mailingProgress',
+      data: {
+        mailings: [],
+      },
+    })
+    listenSocketWithReconnects();
+    // TODO: Красная полоса с неотправленными
+    // TODO: Сортировать логи по таймстемпам, сверху свежие
+
+
+  </script>
+</body>
+</html>
