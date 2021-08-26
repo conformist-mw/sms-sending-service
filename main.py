@@ -40,7 +40,11 @@ async def request_smsc(method, login, password, payload):
     if method not in {'send', 'status'}:
         raise SmscApiError(f'Unknown method: {method}')
     url = f'https://smsc.ua/sys/{method}.php'
-    params = {'login': login, 'psw': password, 'charset': 'utf-8', 'fmt': 3, 'all': 1, **payload}
+    params = {
+        'login': login, 'psw': password,
+        'charset': 'utf-8', 'fmt': 3,
+        **payload,
+    }
     response = await asks.post(url, data=params)
     return response.json()
 
@@ -60,13 +64,12 @@ async def check_status(login, password, phone):
         'id': 1,
     }
     response = await request_smsc('status', login, password, payload)
-    print(response)
     return response
 
 
 async def main():
     async with trio.open_nursery() as nursery:
-        nursery.start_soon(check_status, )
+        nursery.start_soon(check_status, '', '', '')
 
 
 if __name__ == '__main__':
