@@ -6,8 +6,16 @@
 
   <title>Рассылка SMS предупреждений</title>
 
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+    crossorigin="anonymous"
+  >
+  <link
+    rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"
+  >
 
   <style type="text/css">
     body {
@@ -27,7 +35,13 @@
           <fieldset>
             <div class="form-row align-items-center">
               <div class="col">
-                <input type="text" class="form-control mb-2" name="text" required="required" placeholder="Текст сообщения">
+                <input
+                  type="text"
+                  class="form-control mb-2"
+                  name="text"
+                  required="required"
+                  placeholder="Текст сообщения"
+                >
               </div>
               <div class="col-auto">
                 <button type="submit" class="btn btn-primary mb-2">Отправить
@@ -53,9 +67,23 @@
             <div class="col-9">
               <div class="progress mt-1" style="height: 20px;">
 
-                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" :aria-valuenow="mailing.percentFulfilled" aria-valuemin="0" aria-valuemax="100" v-bind:style="{width:mailing.percentFulfilled+'%'}">{{mailing.percentFulfilled + '%'}}</div>
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                  role="progressbar"
+                  :aria-valuenow="mailing.percentFulfilled"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  v-bind:style="{width:mailing.percentFulfilled+'%'}"
+                >{{mailing.percentFulfilled + '%'}}</div>
 
-                <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" :aria-valuenow="mailing.percentFailed" aria-valuemin="0" aria-valuemax="100" v-bind:style="{width:mailing.percentFailed+'%'}">{{mailing.percentFailed + '%'}}</div>
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                  role="progressbar"
+                  :aria-valuenow="mailing.percentFailed"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  v-bind:style="{width:mailing.percentFailed+'%'}"
+                >{{mailing.percentFailed + '%'}}</div>
 
               </div>
               <p class="text-muted mt-2">
@@ -69,13 +97,33 @@
     </div>
 
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/loglevel/1.6.4/loglevel.min.js" integrity="sha256-ACTlnmNCkOooSKkPCKYbiex8WLE82aeiN+Z9ElZag5Q=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.13.1/validate.min.js" integrity="sha256-xgP6yiUGsRLSmsC8oW0KrRWiK2ek7cSBznIDMEcdp/U=" crossorigin="anonymous"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/loglevel/1.6.4/loglevel.min.js"
+    integrity="sha256-ACTlnmNCkOooSKkPCKYbiex8WLE82aeiN+Z9ElZag5Q="
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.13.1/validate.min.js"
+    integrity="sha256-xgP6yiUGsRLSmsC8oW0KrRWiK2ek7cSBznIDMEcdp/U="
+    crossorigin="anonymous"
+  ></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
 
-  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <script
+    src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"
+  ></script>
   <!-- development version, includes helpful console warnings -->
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script type="text/javascript">
@@ -95,11 +143,11 @@
           method: 'POST',
           body: bodyParams,
         }).then(response => {
-          
+
           response.json().then(data => {
             form.reset();
             form.firstElementChild.disabled = false;
-            
+
             if (data.errorMessage){
               alert(data.errorMessage);
             }
