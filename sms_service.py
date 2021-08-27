@@ -2,7 +2,7 @@ import functools
 from unittest.mock import AsyncMock
 
 import asks
-import trio
+from asks.errors import BadStatus
 
 from exceptions import SmscApiError
 
@@ -45,8 +45,15 @@ async def request_smsc(method, login, password, payload):
         'charset': 'utf-8', 'fmt': 3,
         **payload,
     }
-    response = await asks.post(url, data=params)
-    return response.json()
+    try:
+        response = await asks.post(url, data=params)
+        response.raise_for_status()
+        decoded_response = response.json()
+        if 'error' in decoded_response:
+            raise SmscApiError(decoded_response['error'])
+    except BadStatus:
+        raise SmscApiError('Something gone wrong.')
+    return decoded_response
 
 
 async def send_sms(login, password, message, phones):
@@ -65,12 +72,3 @@ async def check_status(login, password, phone):
     }
     response = await request_smsc('status', login, password, payload)
     return response
-
-
-async def main():
-    async with trio.open_nursery() as nursery:
-        nursery.start_soon(check_status, '', '', '')
-
-
-if __name__ == '__main__':
-    trio.run(main)
