@@ -1,3 +1,7 @@
 asks==2.4.12
+python-dotenv==0.19.0
+quart-trio==0.8.0
+quart==0.15.1
 requests==2.26.0
 trio==0.19.0
+trio_asyncio==0.12.0
